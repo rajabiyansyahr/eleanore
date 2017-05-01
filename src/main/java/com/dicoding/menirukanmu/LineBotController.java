@@ -49,6 +49,7 @@ public class LineBotController
         String msgText = " ";
         String idTarget = " ";
         String eventType = payload.events[0].type;
+        String msg = payload.events[0].message.text;
         String[] keyWords = msg.split(" ");
 
         if (eventType.equals("join")){
