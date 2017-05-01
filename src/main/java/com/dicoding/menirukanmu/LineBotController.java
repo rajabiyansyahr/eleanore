@@ -49,6 +49,7 @@ public class LineBotController
         String msgText = " ";
         String idTarget = " ";
         String eventType = payload.events[0].type;
+        String[] keyWords = msg.split(" ");
 
         if (eventType.equals("join")){
             if (payload.events[0].source.type.equals("group")){
@@ -66,7 +67,20 @@ public class LineBotController
                 idTarget = payload.events[0].source.userId;
             }
 
-            if (!payload.events[0].message.type.equals("text")){
+            String theMessage = "You can choose what you'd like to hear :\n1. Dead Story\n2. Ghost Story\n3. How to Interact with ..\n4. My Story";
+
+            if(keyWords[0].equals("bot")){
+                if(keyWords[1].equals("keywords")){
+                    try{
+                        getMessageData(theMessage, idTarget);
+                    } catch (IOException e) {
+                        System.out.println("Exception is raised ");
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            /*if (!payload.events[0].message.type.equals("text")){
                 replyToUser(payload.events[0].replyToken, "Unknown message");
             } else {
                 msgText = payload.events[0].message.text;
@@ -87,7 +101,8 @@ public class LineBotController
                     }
                 }
 
-            }
+            }*/
+            
         }
          
         return new ResponseEntity<String>(HttpStatus.OK);
