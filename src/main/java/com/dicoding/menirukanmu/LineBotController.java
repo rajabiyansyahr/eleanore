@@ -14,7 +14,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import retrofit2.Response;
+import java.util.Collections;
 
+import java.util.List;
+import java.util.ArrayList;
+
+import com.linecorp.bot.model.message.*;
+import com.linecorp.bot.model.message.template.*;
+import com.linecorp.bot.model.action.*;
 import java.io.IOException;
 
 @RestController
@@ -34,9 +41,11 @@ public class LineBotController
         @RequestHeader("X-Line-Signature") String aXLineSignature,
         @RequestBody String aPayload)
     {
+        
         final String text=String.format("The Signature is: %s",
             (aXLineSignature!=null && aXLineSignature.length() > 0) ? aXLineSignature : "N/A");
         System.out.println(text);
+        
         final boolean valid=new LineSignatureValidator(lChannelSecret.getBytes()).validateSignature(aPayload.getBytes(), aXLineSignature);
         System.out.println("The signature is: " + (valid ? "valid" : "tidak valid"));
         if(aPayload!=null && aPayload.length() > 0)
@@ -75,6 +84,22 @@ public class LineBotController
                     try{
                         getMessageData(theMessage, idTarget);
                     } catch (IOException e) {
+                        System.out.println("Exception is raised ");
+                        e.printStackTrace();
+                    }
+                }
+                else if(keyWords[1].equals("reminder")){
+                    try{
+                        List<Action> actions = new ArrayList<Action>();
+						Action action = new URIAction("Google", "http://google.com");
+						actions.add(action);
+						Action actionLeft = new URIAction("Action Left", "http://google.com");
+						Action actionRight = new URIAction("Action Right", "http://google.com");
+						Template temp = new ConfirmTemplate("google Text", actionLeft, actionRight);
+						TemplateMessage tempMsg = new TemplateMessage("ini altText", temp);
+						
+						sendButtonTempalte(tempMsg, idTarget);
+                    } catch (Exception e) {
                         System.out.println("Exception is raised ");
                         e.printStackTrace();
                     }
@@ -125,6 +150,21 @@ public class LineBotController
                 .replyMessage(replyMessage)
                 .execute();
             System.out.println("Reply Message: " + response.code() + " " + response.message());
+        } catch (IOException e) {
+            System.out.println("Exception is raised ");
+            e.printStackTrace();
+        }
+    }
+
+    private void sendButtonTempalte(TemplateMessage message, String to){
+        PushMessage pushMessage = new PushMessage(to,message);
+        try {
+            Response<BotApiResponse> response = LineMessagingServiceBuilder
+            .create(lChannelAccessToken)
+            .build()
+            .pushMessage(pushMessage)
+            .execute();
+            System.out.println(response.code() + " " + response.message());
         } catch (IOException e) {
             System.out.println("Exception is raised ");
             e.printStackTrace();
